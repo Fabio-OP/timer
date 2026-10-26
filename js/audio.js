@@ -68,11 +68,24 @@ class SoundManager {
     }
 
     /**
-     * Play the mechanical flip tick
+     * Play countdown beep / tick (always audible regardless of tick toggle)
+     */
+    playCountdownTick() {
+        this.playTickSound();
+    }
+
+    /**
+     * Play the mechanical flip tick (respects user toggle)
      */
     playTick() {
         if (!this.enabled) return;
+        this.playTickSound();
+    }
 
+    /**
+     * Internal sound playback for tick
+     */
+    playTickSound() {
         // Try playing the MP3 first
         if (this.flipAudio) {
             this.flipAudio.currentTime = 0;

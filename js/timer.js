@@ -64,7 +64,7 @@ class FocusTimer {
             countdownNum.innerText = count;
         }
 
-        this.soundManager.playTick();
+        this.soundManager.playCountdownTick();
 
         this.countdownInterval = setInterval(() => {
             count--;
@@ -76,7 +76,7 @@ class FocusTimer {
                     countdownNum.offsetHeight; /* trigger reflow */
                     countdownNum.style.animation = null;
                 }
-                this.soundManager.playTick();
+                this.soundManager.playCountdownTick();
             } else {
                 clearInterval(this.countdownInterval);
                 this.countdownInterval = null;
