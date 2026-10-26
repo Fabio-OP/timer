@@ -2,458 +2,205 @@
 <html lang="it">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
+    <meta name="theme-color" content="#120a14">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="description" content="Aesthetic Flip Clock Focus Timer con suoni rilassanti, visuale Pomodoro e design ultra reattivo per mobile e desktop.">
+
     <title>Aesthetic Flip Clock Timer</title>
-    <!-- Importo Tailwind CSS per il layout e la UI -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Importo i font: Oswald per il timer, Quicksand per una UI più morbida e femminile -->
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=Quicksand:wght@400;500;600;700&display=swap');
 
-        body {
-            /* Sfondo scuro ma con una tonalità molto calda e accogliente (Prugna scuro / Rosa antico scuro) */
-            background: radial-gradient(circle at center, #2d1f2e 0%, #120a14 100%);
-            color: #ffffff;
-            font-family: 'Quicksand', sans-serif;
-            overflow: hidden; /* Evita lo scroll */
-            margin: 0;
-            height: 100vh;
-        }
-
-        /* STILI FLIP CLOCK (Aesthetic Dark Rose) */
-        .clock-container {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: clamp(10px, 2vw, 20px);
-            z-index: 10;
-        }
-
-        .time-section {
-            display: flex;
-            gap: clamp(6px, 1vw, 12px);
-        }
-
-        .flip-unit {
-            position: relative;
-            width: clamp(70px, 15vw, 150px);
-            height: clamp(100px, 22vw, 220px);
-            font-size: clamp(5rem, 12vw, 12rem);
-            font-family: 'Oswald', sans-serif;
-            font-weight: 700;
-            border-radius: clamp(12px, 2.5vw, 24px);
-            perspective: 1000px;
-            /* Ombra morbida con un leggero alone rosa */
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6), 0 0 40px rgba(244, 114, 182, 0.05);
-            background-color: #1a1217;
-        }
-
-        /* Le due metà della scheda con un colore più morbido rispetto al nero puro */
-        .flip-half {
-            position: absolute;
-            left: 0;
-            width: 100%;
-            height: 50%;
-            background: linear-gradient(to bottom, #2e222a 0%, #1c1419 100%);
-            color: #fdf2f8; /* Rosa chiarissimo quasi bianco */
-            overflow: hidden;
-            display: flex;
-            justify-content: center;
-            backface-visibility: hidden;
-            transform-style: preserve-3d;
-        }
-
-        .flip-half span {
-            position: absolute;
-            height: 200%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 100%;
-        }
-
-        .flip-half.top {
-            top: 0;
-            align-items: flex-end;
-            transform-origin: bottom center;
-            border-radius: clamp(12px, 2.5vw, 24px) clamp(12px, 2.5vw, 24px) 0 0;
-            border-bottom: clamp(1px, 0.3vw, 2px) solid #11090f;
-        }
-        .flip-half.top span { top: 0; }
-
-        .flip-half.bottom {
-            bottom: 0;
-            align-items: flex-start;
-            transform-origin: top center;
-            border-radius: 0 0 clamp(12px, 2.5vw, 24px) clamp(12px, 2.5vw, 24px);
-            border-top: clamp(1px, 0.3vw, 2px) solid rgba(255,192,203,0.08); /* Riflesso rosa sul bordo */
-        }
-        .flip-half.bottom span { bottom: 0; }
-
-        /* Animazioni 3D per il Flap che scende */
-        .flip-top-anim {
-            animation: flipTop 0.25s ease-in forwards;
-            z-index: 2;
-        }
-        .flip-bot-anim {
-            animation: flipBot 0.25s ease-out 0.25s forwards;
-            z-index: 1;
-            transform: rotateX(90deg);
-        }
-
-        @keyframes flipTop {
-            0% { transform: rotateX(0deg); }
-            100% { transform: rotateX(-90deg); }
-        }
-        @keyframes flipBot {
-            0% { transform: rotateX(90deg); }
-            100% { transform: rotateX(0deg); }
-        }
-
-        .colon {
-            font-size: clamp(4rem, 10vw, 10rem);
-            font-family: 'Oswald', sans-serif;
-            font-weight: 700;
-            color: #fbcfe8; /* Rosa pastello */
-            margin-bottom: clamp(10px, 2vw, 20px);
-            text-shadow: 0 0 15px rgba(244,114,182,0.3);
-        }
-
-        /* INPUT SENZA FRECCE */
-        input[type=number]::-webkit-inner-spin-button, 
-        input[type=number]::-webkit-outer-spin-button { 
-            -webkit-appearance: none; 
-            margin: 0; 
-        }
-        input[type=number] {
-            -moz-appearance: textfield;
-        }
-    </style>
+    <!-- Component & Master Stylesheets -->
+    <link rel="stylesheet" href="css/flip-clock.css">
+    <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
-    <!-- OROLOGIO (Al centro dello schermo) -->
-    <div class="fixed inset-0 flex items-center justify-center pointer-events-none z-0">
-        <div class="clock-container pointer-events-auto transition-transform duration-700 ease-in-out hover:scale-105">
-            <!-- Minuti -->
-            <div class="time-section">
-                <div class="flip-unit" id="m-tens" data-val="-1"></div>
-                <div class="flip-unit" id="m-units" data-val="-1"></div>
-            </div>
-            <!-- Due Punti -->
-            <div class="colon">:</div>
-            <!-- Secondi -->
-            <div class="time-section">
-                <div class="flip-unit" id="s-tens" data-val="-1"></div>
-                <div class="flip-unit" id="s-units" data-val="-1"></div>
-            </div>
-        </div>
-    </div>
+    <!-- Ambient Glowing Light Orbs -->
+    <div class="ambient-glow-1"></div>
+    <div class="ambient-glow-2"></div>
 
-    <!-- COUNTDOWN OVERLAY (Appare prima dell'avvio) -->
-    <div id="countdown-overlay" class="fixed inset-0 flex items-center justify-center pointer-events-none z-40 hidden bg-black/40 backdrop-blur-sm transition-opacity duration-300">
-        <span id="countdown-text" class="text-[12rem] md:text-[18rem] font-bold text-pink-200 font-['Oswald'] drop-shadow-[0_0_40px_rgba(244,114,182,0.6)] animate-pulse">3</span>
-    </div>
-
-    <!-- UI OVERLAY (Sfuma quando il mouse è fermo) -->
-    <div id="ui-overlay" class="fixed inset-0 pointer-events-none flex flex-col justify-end items-center pb-10 sm:pb-16 transition-opacity duration-1000 z-50">
+    <main class="app-container">
         
-        <!-- Pulsante Fullscreen Cute -->
-        <button onclick="toggleFullscreen()" class="pointer-events-auto absolute top-6 right-6 bg-white/10 hover:bg-white/20 p-4 rounded-full text-pink-100 backdrop-blur-md transition-all shadow-[0_4px_15px_rgba(0,0,0,0.2)] border border-white/10 hover:scale-110" title="Schermo Intero">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"></path></svg>
-        </button>
+        <!-- Top App Bar -->
+        <header class="top-bar" id="top-bar">
+            <div class="brand-badge">
+                <span class="status-dot" id="status-dot"></span>
+                <span id="status-text">Pronto</span>
+            </div>
 
-        <!-- Pannello Controlli Glassmorphism -->
-        <div class="pointer-events-auto bg-white/5 backdrop-blur-xl p-8 rounded-[2rem] shadow-2xl flex flex-col items-center gap-7 border border-white/10 relative overflow-hidden">
-            
-            <!-- Piccolo bagliore di sfondo nel pannello -->
-            <div class="absolute -top-10 -right-10 w-32 h-32 bg-pink-500/20 rounded-full blur-3xl"></div>
-            <div class="absolute -bottom-10 -left-10 w-32 h-32 bg-purple-500/20 rounded-full blur-3xl"></div>
+            <div class="top-actions">
+                <!-- Help / Shortcuts button -->
+                <button class="icon-btn" id="btn-help" title="Scorciatoie & Info (?)" aria-label="Informazioni e scorciatoie">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <circle cx="12" cy="12" r="10" stroke-width="2"></circle>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 16v-2m0-4.5a2 2 0 112 2c-.5.5-1 1-1 1.5"></path>
+                    </svg>
+                </button>
 
-            <!-- Titolo Carino -->
-            <h2 class="text-pink-100/90 font-bold text-lg tracking-wider uppercase flex items-center gap-2 relative z-10">
-                <span class="text-xl">🌸</span> Focus Timer
-            </h2>
-            
-            <!-- Input Tempo -->
-            <div class="flex gap-4 items-end relative z-10">
-                <div class="flex flex-col items-center gap-2">
-                    <label class="text-pink-200/70 text-sm font-semibold tracking-widest uppercase">Minuti</label>
-                    <input type="number" id="in-m" min="0" max="99" value="20" class="w-24 bg-white/10 text-white rounded-2xl p-3 text-center text-4xl font-bold border-2 border-transparent focus:border-pink-400 focus:bg-white/15 outline-none transition-all shadow-[inset_0_2px_8px_rgba(0,0,0,0.2)]">
+                <!-- Fullscreen button -->
+                <button class="icon-btn" id="btn-fullscreen" title="Schermo Intero (F)" aria-label="Schermo intero">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"></path>
+                    </svg>
+                </button>
+            </div>
+        </header>
+
+        <!-- Center Flip Clock Stage -->
+        <section class="clock-stage">
+            <div class="clock-container" id="clock-container" role="timer" aria-live="polite">
+                <!-- Minutes Section -->
+                <div class="time-section" aria-label="Minuti">
+                    <div class="flip-unit" id="m-tens" data-val="-1"></div>
+                    <div class="flip-unit" id="m-units" data-val="-1"></div>
                 </div>
-                <div class="text-4xl text-pink-200/50 font-bold pb-4">:</div>
-                <div class="flex flex-col items-center gap-2">
-                    <label class="text-pink-200/70 text-sm font-semibold tracking-widest uppercase">Secondi</label>
-                    <input type="number" id="in-s" min="0" max="59" value="0" class="w-24 bg-white/10 text-white rounded-2xl p-3 text-center text-4xl font-bold border-2 border-transparent focus:border-pink-400 focus:bg-white/15 outline-none transition-all shadow-[inset_0_2px_8px_rgba(0,0,0,0.2)]">
+
+                <!-- Separator -->
+                <div class="colon" aria-hidden="true">:</div>
+
+                <!-- Seconds Section -->
+                <div class="time-section" aria-label="Secondi">
+                    <div class="flip-unit" id="s-tens" data-val="-1"></div>
+                    <div class="flip-unit" id="s-units" data-val="-1"></div>
                 </div>
             </div>
 
-            <!-- Bottoni -->
-            <div class="flex gap-4 relative z-10 w-full justify-center mt-2">
-                <button id="btn-start" onclick="startTimer()" class="bg-gradient-to-r from-pink-500 to-rose-400 hover:from-pink-400 hover:to-rose-300 text-white px-10 py-3.5 rounded-full font-bold text-lg transition-all transform hover:scale-105 shadow-[0_8px_20px_rgba(244,114,182,0.4)]">Avvia</button>
-                <button id="btn-pause" onclick="pauseTimer()" class="bg-white/20 hover:bg-white/30 text-white px-10 py-3.5 rounded-full font-bold text-lg transition-all transform hover:scale-105 shadow-lg border border-white/10 hidden">Pausa</button>
-                <button onclick="resetTimer()" class="bg-transparent hover:bg-white/5 text-pink-100/70 border border-pink-100/20 px-6 py-3.5 rounded-full font-bold text-lg transition-colors">Azzera</button>
+            <!-- Session Progress Indicator -->
+            <div class="progress-container" title="Progresso sessione">
+                <div class="progress-bar" id="progress-bar"></div>
             </div>
+        </section>
 
-            <!-- Opzione Suono con Toggle Switch carino -->
-            <div class="relative z-10 mt-2">
-                <label class="flex items-center cursor-pointer gap-3 bg-black/20 hover:bg-black/30 px-6 py-3 rounded-full border border-white/5 transition-colors">
-                    <div class="relative">
-                        <input type="checkbox" id="sound-tick" class="sr-only peer" checked>
-                        <div class="w-11 h-6 bg-white/10 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-pink-400 shadow-inner"></div>
+        <!-- Bottom Controls Glassmorphism Wrapper -->
+        <div class="controls-wrapper" id="controls-wrapper">
+            <div class="controls-card">
+                
+                <!-- Quick Duration Presets -->
+                <div class="presets-row">
+                    <button class="preset-chip" data-seconds="300">5 min</button>
+                    <button class="preset-chip" data-seconds="900">15 min</button>
+                    <button class="preset-chip active" data-seconds="1200">20 min</button>
+                    <button class="preset-chip" data-seconds="1500">25 min (Pomodoro)</button>
+                    <button class="preset-chip" data-seconds="3000">50 min</button>
+                </div>
+
+                <!-- Time Inputs Row with Steppers -->
+                <div class="time-inputs-row">
+                    <!-- Minutes input block -->
+                    <div class="input-block">
+                        <label for="in-m" class="input-label">Minuti</label>
+                        <div class="input-stepper">
+                            <button type="button" class="step-btn" data-target="in-m" data-step="-1" aria-label="Diminuisci minuti">-</button>
+                            <input type="number" id="in-m" min="0" max="99" value="20" inputmode="numeric" class="time-number-input" aria-label="Imposta minuti">
+                            <button type="button" class="step-btn" data-target="in-m" data-step="1" aria-label="Aumenta minuti">+</button>
+                        </div>
                     </div>
-                    <span class="text-pink-50 font-medium text-sm">Suono Rilassante 🎵</span>
-                </label>
-            </div>
 
+                    <span class="input-separator" aria-hidden="true">:</span>
+
+                    <!-- Seconds input block -->
+                    <div class="input-block">
+                        <label for="in-s" class="input-label">Secondi</label>
+                        <div class="input-stepper">
+                            <button type="button" class="step-btn" data-target="in-s" data-step="-5" aria-label="Diminuisci secondi">-</button>
+                            <input type="number" id="in-s" min="0" max="59" value="00" inputmode="numeric" class="time-number-input" aria-label="Imposta secondi">
+                            <button type="button" class="step-btn" data-target="in-s" data-step="5" aria-label="Aumenta secondi">+</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="actions-row">
+                    <button id="btn-start" class="btn-primary">
+                        <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                        <span>Avvia</span>
+                    </button>
+                    <button id="btn-resume" class="btn-primary hidden">
+                        <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                        <span>Riprendi</span>
+                    </button>
+                    <button id="btn-pause" class="btn-secondary hidden">
+                        <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+                        <span>Pausa</span>
+                    </button>
+                    <button id="btn-reset" class="btn-ghost">
+                        <span>Azzera</span>
+                    </button>
+                </div>
+
+                <!-- Options & Sound Toggle -->
+                <div class="options-bar">
+                    <label class="toggle-label" for="sound-tick">
+                        <div class="switch">
+                            <input type="checkbox" id="sound-tick" checked>
+                            <span class="slider"></span>
+                        </div>
+                        <span>Suono Flip / Ticking</span>
+                    </label>
+
+                    <span class="desktop-hint" style="opacity: 0.65; font-size: 0.76rem;">
+                        Spazio = Avvia/Pausa
+                    </span>
+                </div>
+
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Floating Button to Restore Controls on Touch / Mobile -->
+    <button id="btn-restore-ui" class="restore-ui-btn" title="Mostra controlli" aria-label="Mostra controlli">
+        <svg width="22" height="22" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path>
+        </svg>
+    </button>
+
+    <!-- 3-Second Countdown Overlay -->
+    <div id="countdown-overlay" class="countdown-overlay" aria-hidden="true">
+        <div id="countdown-number" class="countdown-number">3</div>
+        <div class="countdown-subtext">Focus in arrivo...</div>
+    </div>
+
+    <!-- Shortcuts & Info Modal -->
+    <div id="help-modal" class="modal-backdrop" aria-hidden="true">
+        <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+            <div class="modal-header">
+                <h3 id="modal-title">🌸 Controlli & Scorciatoie</h3>
+                <button id="btn-close-modal" class="icon-btn" style="width: 32px; height: 32px;" aria-label="Chiudi finestra">✕</button>
+            </div>
+            <div class="modal-list">
+                <div class="modal-item">
+                    <span>Avvia / Pausa / Riprendi</span>
+                    <span class="key-tag">Spazio</span>
+                </div>
+                <div class="modal-item">
+                    <span>Azzera timer</span>
+                    <span class="key-tag">R</span>
+                </div>
+                <div class="modal-item">
+                    <span>Schermo intero</span>
+                    <span class="key-tag">F</span>
+                </div>
+                <div class="modal-item">
+                    <span>Attiva/Disattiva Suono</span>
+                    <span class="key-tag">M</span>
+                </div>
+                <div class="modal-item">
+                    <span>Mostra/Nascondi UI</span>
+                    <span class="key-tag">Tocco / Click sullo sfondo</span>
+                </div>
+                <div class="modal-item" style="border: none; margin-top: 6px;">
+                    <span style="font-size: 0.8rem; opacity: 0.75;">📱 Su mobile lo schermo rimane attivo durante il timer (Screen Wake Lock).</span>
+                </div>
+            </div>
         </div>
     </div>
 
-    <script>
-        /* === GESTIONE AUDIO (Suono Meccanico Reale) === */
-        let audioCtx;
-        const flipAudio = new Audio('flip.mp3'); // Carica il tuo file mp3 locale
-        
-        function initAudio() {
-            if (!audioCtx) {
-                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            }
-            if (audioCtx.state === 'suspended') {
-                audioCtx.resume();
-            }
-        }
-
-        // Riproduzione del file MP3 "flip.mp3"
-        function playFlipSound() {
-            if (!document.getElementById('sound-tick').checked) return;
-            
-            // Riporta il suono all'inizio ad ogni scatto (utile per evitare sovrapposizioni)
-            flipAudio.currentTime = 0; 
-            flipAudio.play().catch(e => console.log("In attesa di interazione per l'audio:", e));
-        }
-
-        // Suono d'allarme finale morbido
-        function playAlarm() {
-            initAudio();
-            let now = audioCtx.currentTime;
-            
-            for(let i=0; i<4; i++) {
-                const osc = audioCtx.createOscillator();
-                const gain = audioCtx.createGain();
-                
-                osc.type = 'sine'; // Suono più dolce
-                osc.frequency.setValueAtTime(800, now + i*0.6);
-                osc.frequency.setValueAtTime(1000, now + i*0.6 + 0.1); // Melodia dolce
-                
-                gain.gain.setValueAtTime(0, now + i*0.6);
-                gain.gain.linearRampToValueAtTime(0.4, now + i*0.6 + 0.1);
-                gain.gain.exponentialRampToValueAtTime(0.001, now + i*0.6 + 0.5);
-                
-                osc.connect(gain);
-                gain.connect(audioCtx.destination);
-                
-                osc.start(now + i*0.6);
-                osc.stop(now + i*0.6 + 0.5);
-            }
-        }
-
-        /* === LOGICA TIMER === */
-        let remainingTime = 1200; 
-        let targetEndTime = 0;
-        let timerInterval = null;
-        let countInterval = null;
-        let isRunning = false;
-        let isCountingDown = false;
-
-        function updateUnit(id, value) {
-            const el = document.getElementById(id);
-            if (el.dataset.val !== value) {
-                const oldVal = el.dataset.val !== "-1" ? el.dataset.val : value;
-                el.dataset.val = value;
-                
-                el.innerHTML = '';
-                
-                const topStatic = document.createElement('div');
-                topStatic.className = 'flip-half top';
-                topStatic.innerHTML = `<span>${value}</span>`;
-                
-                const botStatic = document.createElement('div');
-                botStatic.className = 'flip-half bottom';
-                botStatic.innerHTML = `<span>${oldVal}</span>`;
-                
-                const topFlap = document.createElement('div');
-                topFlap.className = 'flip-half top flip-top-anim';
-                topFlap.innerHTML = `<span>${oldVal}</span>`;
-                
-                const botFlap = document.createElement('div');
-                botFlap.className = 'flip-half bottom flip-bot-anim';
-                botFlap.innerHTML = `<span>${value}</span>`;
-                
-                el.appendChild(topStatic);
-                el.appendChild(botStatic);
-                el.appendChild(topFlap);
-                el.appendChild(botFlap);
-            }
-        }
-
-        function updateDisplay() {
-            let m = Math.floor(remainingTime / 60);
-            let s = remainingTime % 60;
-            
-            if (m > 99) m = 99;
-
-            let mStr = m.toString().padStart(2, '0');
-            let sStr = s.toString().padStart(2, '0');
-            
-            updateUnit('m-tens', mStr[0]);
-            updateUnit('m-units', mStr[1]);
-            updateUnit('s-tens', sStr[0]);
-            updateUnit('s-units', sStr[1]);
-        }
-
-        function syncFromInputs() {
-            let m = parseInt(document.getElementById('in-m').value) || 0;
-            let s = parseInt(document.getElementById('in-s').value) || 0;
-            if (m > 99) m = 99;
-            if (s > 59) s = 59;
-            document.getElementById('in-m').value = m;
-            document.getElementById('in-s').value = s;
-            remainingTime = (m * 60) + s;
-            updateDisplay();
-        }
-
-        document.querySelectorAll('input[type="number"]').forEach(input => {
-            input.addEventListener('input', () => {
-                if (!isRunning) syncFromInputs();
-            });
-        });
-
-        const btnStart = document.getElementById('btn-start');
-        const btnPause = document.getElementById('btn-pause');
-
-        function startTimer() {
-            if (isRunning || isCountingDown) return;
-            initAudio(); 
-
-            if (remainingTime <= 0) syncFromInputs();
-            if (remainingTime <= 0) return; 
-
-            isCountingDown = true;
-            
-            // Nasconde l'interfaccia immediatamente
-            uiContainer.style.opacity = '0';
-            uiContainer.style.pointerEvents = 'none';
-            btnStart.classList.add('hidden');
-            btnPause.classList.remove('hidden');
-
-            // Mostra il countdown overlay in sovraimpressione
-            const countdownEl = document.getElementById('countdown-overlay');
-            const countdownText = document.getElementById('countdown-text');
-            countdownEl.classList.remove('hidden');
-            
-            let count = 3;
-            countdownText.innerText = count;
-
-            // Avvia il conto alla rovescia di 3 secondi
-            countInterval = setInterval(() => {
-                count--;
-                if (count > 0) {
-                    countdownText.innerText = count;
-                } else {
-                    // Fine del conto alla rovescia, pulizia
-                    clearInterval(countInterval);
-                    countdownEl.classList.add('hidden');
-                    isCountingDown = false;
-                    
-                    // Avvia il vero timer
-                    isRunning = true;
-                    targetEndTime = Date.now() + (remainingTime * 1000);
-                    
-                    timerInterval = setInterval(() => {
-                        let now = Date.now();
-                        let diff = Math.round((targetEndTime - now) / 1000);
-                        
-                        if (diff < 0) diff = 0;
-                        
-                        if (diff !== remainingTime) {
-                            remainingTime = diff;
-                            updateDisplay();
-                            
-                            if (remainingTime > 0) {
-                                playFlipSound();
-                            } else {
-                                clearInterval(timerInterval);
-                                isRunning = false;
-                                playAlarm();
-                                
-                                btnPause.classList.add('hidden');
-                                btnStart.classList.remove('hidden');
-                                
-                                uiContainer.style.opacity = '1';
-                                uiContainer.style.pointerEvents = 'auto';
-                            }
-                        }
-                    }, 100);
-                }
-            }, 1000);
-        }
-
-        function pauseTimer() {
-            isRunning = false;
-            isCountingDown = false;
-            clearInterval(timerInterval);
-            if (countInterval) clearInterval(countInterval);
-            
-            // Nasconde eventuale overlay del countdown
-            document.getElementById('countdown-overlay').classList.add('hidden');
-            
-            btnPause.classList.add('hidden');
-            btnStart.classList.remove('hidden');
-
-            uiContainer.style.opacity = '1';
-            uiContainer.style.pointerEvents = 'auto';
-            clearTimeout(mouseTimeout);
-        }
-
-        function resetTimer() {
-            pauseTimer();
-            syncFromInputs();
-        }
-
-        /* === GESTIONE UI A SCOMPARSA === */
-        const uiContainer = document.getElementById('ui-overlay');
-        let mouseTimeout;
-
-        document.addEventListener('mousemove', () => {
-            // Blocca la comparsa dell'interfaccia durante i 3 secondi di countdown iniziali
-            if (isCountingDown) return; 
-
-            uiContainer.style.opacity = '1';
-            uiContainer.style.pointerEvents = 'auto';
-            clearTimeout(mouseTimeout);
-            
-            if (isRunning) {
-                mouseTimeout = setTimeout(() => {
-                    uiContainer.style.opacity = '0';
-                    uiContainer.style.pointerEvents = 'none';
-                }, 3500); // Ci mette un po' di più a sparire
-            }
-        });
-
-        /* === SCHERMO INTERO === */
-        function toggleFullscreen() {
-            if (!document.fullscreenElement) {
-                document.documentElement.requestFullscreen().catch(err => {
-                    console.log(`Errore attivazione schermo intero: ${err.message}`);
-                });
-            } else {
-                if (document.exitFullscreen) {
-                    document.exitFullscreen();
-                }
-            }
-        }
-
-        syncFromInputs();
-    </script>
+    <!-- Core Modular Scripts -->
+    <script src="js/audio.js"></script>
+    <script src="js/clock-flip.js"></script>
+    <script src="js/timer.js"></script>
+    <script src="js/app.js"></script>
 </body>
 </html>

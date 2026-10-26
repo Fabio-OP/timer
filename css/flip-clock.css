@@ -1,0 +1,209 @@
+/* ==========================================================================
+   FLIP CLOCK COMPONENT STYLES
+   Aesthetic Dark Rose / Plum Theme
+   ========================================================================== */
+
+:root {
+    --flip-bg-top: #2b1d27;
+    --flip-bg-bottom: #191016;
+    --flip-text-color: #fdf2f8;
+    --flip-border-split: #0e070c;
+    --flip-border-highlight: rgba(244, 114, 182, 0.15);
+    --flip-shadow: 0 16px 36px rgba(0, 0, 0, 0.65), 0 0 45px rgba(244, 114, 182, 0.08);
+    --flip-radius: clamp(10px, 2.2vw, 22px);
+    --flip-duration: 0.28s;
+}
+
+/* Master container */
+.clock-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: clamp(8px, 2.2vw, 24px);
+    user-select: none;
+    -webkit-user-select: none;
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    max-width: 100%;
+}
+
+.time-section {
+    display: flex;
+    gap: clamp(4px, 1.2vw, 12px);
+}
+
+/* Individual digit unit */
+.flip-unit {
+    position: relative;
+    width: clamp(52px, 15vw, 140px);
+    height: clamp(78px, 22vw, 210px);
+    font-size: clamp(3.4rem, 13vw, 10.5rem);
+    font-family: 'Oswald', sans-serif;
+    font-weight: 700;
+    line-height: 1;
+    border-radius: var(--flip-radius);
+    perspective: 1000px;
+    -webkit-perspective: 1000px;
+    box-shadow: var(--flip-shadow);
+    background-color: var(--flip-bg-bottom);
+}
+
+/* Upper and lower half of the card */
+.flip-half {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    height: 50%;
+    color: var(--flip-text-color);
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    transform-style: preserve-3d;
+    -webkit-transform-style: preserve-3d;
+    will-change: transform;
+}
+
+/* Digit text wrapper inside card halves */
+.flip-half span {
+    position: absolute;
+    height: 200%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+}
+
+/* Top half */
+.flip-half.top {
+    top: 0;
+    align-items: flex-end;
+    transform-origin: bottom center;
+    border-radius: var(--flip-radius) var(--flip-radius) 0 0;
+    background: linear-gradient(180deg, #32222d 0%, #22161f 100%);
+    border-bottom: 1px solid var(--flip-border-split);
+    box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.08);
+}
+.flip-half.top span {
+    top: 0;
+}
+
+/* Bottom half */
+.flip-half.bottom {
+    bottom: 0;
+    align-items: flex-start;
+    transform-origin: top center;
+    border-radius: 0 0 var(--flip-radius) var(--flip-radius);
+    background: linear-gradient(180deg, #20141c 0%, #150c13 100%);
+    border-top: 1px solid var(--flip-border-highlight);
+    box-shadow: inset 0 -1px 2px rgba(0, 0, 0, 0.5);
+}
+.flip-half.bottom span {
+    bottom: 0;
+}
+
+/* Middle hinge line overlay */
+.flip-unit::after {
+    content: '';
+    position: absolute;
+    top: calc(50% - 1px);
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(90deg, 
+        rgba(0, 0, 0, 0.8) 0%, 
+        rgba(20, 10, 18, 0.9) 50%, 
+        rgba(0, 0, 0, 0.8) 100%
+    );
+    z-index: 5;
+    pointer-events: none;
+}
+
+/* 3D Flip Animations */
+.flip-top-anim {
+    animation: flipTopAnim var(--flip-duration) cubic-bezier(0.37, 0, 0.63, 1) forwards;
+    z-index: 3;
+}
+
+.flip-bot-anim {
+    animation: flipBotAnim var(--flip-duration) cubic-bezier(0.37, 0, 0.63, 1) var(--flip-duration) forwards;
+    z-index: 2;
+    transform: rotateX(90deg);
+}
+
+@keyframes flipTopAnim {
+    0% {
+        transform: rotateX(0deg);
+        filter: brightness(1);
+    }
+    100% {
+        transform: rotateX(-90deg);
+        filter: brightness(0.7);
+    }
+}
+
+@keyframes flipBotAnim {
+    0% {
+        transform: rotateX(90deg);
+        filter: brightness(0.7);
+    }
+    100% {
+        transform: rotateX(0deg);
+        filter: brightness(1);
+    }
+}
+
+/* Colon separator */
+.colon {
+    font-size: clamp(3rem, 10vw, 8.5rem);
+    font-family: 'Oswald', sans-serif;
+    font-weight: 700;
+    color: #fbcfe8;
+    line-height: 1;
+    margin-bottom: clamp(6px, 1.5vw, 16px);
+    text-shadow: 0 0 20px rgba(244, 114, 182, 0.45);
+    animation: colonBlink 2s ease-in-out infinite;
+}
+
+@keyframes colonBlink {
+    0%, 100% {
+        opacity: 0.95;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.5;
+        transform: scale(0.97);
+    }
+}
+
+/* Mobile & Landscape Adjustments */
+@media (max-width: 480px) {
+    .clock-container {
+        gap: 6px;
+    }
+    .time-section {
+        gap: 4px;
+    }
+    .flip-unit {
+        width: clamp(40px, 19vw, 76px);
+        height: clamp(62px, 29vw, 118px);
+        font-size: clamp(2.6rem, 16vw, 5.2rem);
+    }
+    .colon {
+        font-size: clamp(2.2rem, 12vw, 4.2rem);
+        margin-bottom: 4px;
+    }
+}
+
+/* For very short screens (landscape mobile) */
+@media (max-height: 520px) {
+    .flip-unit {
+        width: clamp(48px, 12vw, 85px);
+        height: clamp(70px, 18vw, 125px);
+        font-size: clamp(2.8rem, 11vw, 5.8rem);
+    }
+    .colon {
+        font-size: clamp(2.5rem, 8vw, 4.5rem);
+    }
+}
