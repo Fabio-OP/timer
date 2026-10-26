@@ -25,8 +25,8 @@ class SoundManager {
      */
     initAudioElement() {
         try {
-            // Support both root flip.mp3 and assets/audio/flip.mp3
-            this.flipAudio = new Audio('flip.mp3');
+            // Support both root flip.mp3 and assets/audio/flip.mp3 with cache busting
+            this.flipAudio = new Audio('flip.mp3?v=2');
             this.flipAudio.preload = 'auto';
             
             this.flipAudio.addEventListener('canplaythrough', () => {
@@ -36,7 +36,7 @@ class SoundManager {
             this.flipAudio.addEventListener('error', () => {
                 // Try fallback to assets folder if root failed
                 if (this.flipAudio.src && !this.flipAudio.src.includes('assets/')) {
-                    this.flipAudio.src = 'assets/flip.mp3';
+                    this.flipAudio.src = 'assets/flip.mp3?v=2';
                 }
             }, { once: true });
         } catch (e) {
