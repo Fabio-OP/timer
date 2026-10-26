@@ -164,7 +164,7 @@ class FocusTimer {
 
         this.soundManager.playAlarm();
         this.notifyState();
-        this.updateDocumentTitle('🌸 Tempo Scaduto!');
+        this.updateDocumentTitle('00:00 - Tempo Scaduto');
 
         // Optional vibration for mobile devices supporting navigator.vibrate
         if (navigator.vibrate) {
@@ -186,7 +186,7 @@ class FocusTimer {
     }
 
     /**
-     * Update document tab title
+     * Update document tab title (only timer numbers, no emojis)
      */
     updateDocumentTitle(customTitle) {
         if (customTitle) {
@@ -194,15 +194,15 @@ class FocusTimer {
             return;
         }
 
+        const m = Math.floor(this.remainingTime / 60);
+        const s = this.remainingTime % 60;
+        const mStr = String(m).padStart(2, '0');
+        const sStr = String(s).padStart(2, '0');
+
         if (this.state === 'RUNNING' || this.state === 'PAUSED') {
-            const m = Math.floor(this.remainingTime / 60);
-            const s = this.remainingTime % 60;
-            const mStr = String(m).padStart(2, '0');
-            const sStr = String(s).padStart(2, '0');
-            const prefix = this.state === 'PAUSED' ? '⏸️' : '⏱️';
-            document.title = `${prefix} (${mStr}:${sStr}) Focus Timer`;
+            document.title = `${mStr}:${sStr}`;
         } else {
-            document.title = 'Aesthetic Flip Clock Timer';
+            document.title = `${mStr}:${sStr} - Timer`;
         }
     }
 

@@ -26,6 +26,18 @@
     -webkit-tap-highlight-color: transparent;
 }
 
+/* Suppress all browser spin buttons unconditionally */
+input[type=number]::-webkit-inner-spin-button, 
+input[type=number]::-webkit-outer-spin-button { 
+    -webkit-appearance: none !important;
+    margin: 0 !important;
+    display: none !important;
+}
+input[type=number] {
+    -moz-appearance: textfield !important;
+    appearance: none !important;
+}
+
 html, body {
     width: 100%;
     height: 100%;
@@ -85,7 +97,7 @@ html, body {
     z-index: 10;
 }
 
-/* Top App Header / Utility bar */
+/* Top App Header */
 .top-bar {
     width: 100%;
     max-width: 960px;
@@ -93,7 +105,16 @@ html, body {
     justify-content: space-between;
     align-items: center;
     z-index: 30;
-    transition: opacity 0.35s ease, transform 0.35s ease;
+    transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1), 
+                transform 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+                visibility 0.4s;
+}
+
+.top-bar.ui-faded {
+    opacity: 0 !important;
+    pointer-events: none !important;
+    transform: translateY(-24px) scale(0.97) !important;
+    visibility: hidden !important;
 }
 
 .brand-badge {
@@ -176,6 +197,13 @@ html, body {
     height: 20px;
 }
 
+/* Hide Fullscreen Button on Mobile Devices / Small Screens */
+@media (max-width: 768px), (pointer: coarse) {
+    #btn-fullscreen {
+        display: none !important;
+    }
+}
+
 /* Center Clock Stage */
 .clock-stage {
     flex: 1;
@@ -186,11 +214,40 @@ html, body {
     width: 100%;
     position: relative;
     z-index: 10;
+    pointer-events: none;
+    transition: transform 0.55s cubic-bezier(0.16, 1, 0.3, 1);
+    transform: translateY(0) scale(1);
+    transform-origin: center center;
+    will-change: transform;
+}
+
+.clock-stage .clock-container {
+    pointer-events: auto;
+}
+
+/* Quando il menu si nasconde: scende dolcemente al centro dello schermo */
+.clock-stage.clock-expanded {
+    transform: translateY(clamp(55px, 8.5vh, 90px)) scale(1.18);
+}
+
+/* Su smartphone: va al centro MA NON si ingrandisce per non sbordare dallo schermo! */
+@media (max-width: 768px) {
+    .clock-stage.clock-expanded {
+        transform: translateY(clamp(42px, 7.5vh, 70px)) scale(1) !important;
+    }
+}
+
+/* In modalità orizzontale (landscape) su smartphone */
+@media (max-height: 540px) {
+    .clock-stage.clock-expanded {
+        transform: translateY(20px) scale(1) !important;
+    }
 }
 
 /* Session Progress Indicator */
 .progress-container {
     width: clamp(220px, 60vw, 420px);
+    max-width: 88vw;
     height: 5px;
     background: rgba(255, 255, 255, 0.08);
     border-radius: 9999px;
@@ -198,6 +255,7 @@ html, body {
     overflow: hidden;
     position: relative;
     border: 1px solid rgba(255, 255, 255, 0.05);
+    pointer-events: auto;
 }
 
 .progress-bar {
@@ -212,27 +270,29 @@ html, body {
 /* Bottom Controls Section */
 .controls-wrapper {
     width: 100%;
-    max-width: 580px;
+    max-width: 560px;
     display: flex;
     flex-direction: column;
     align-items: center;
     z-index: 30;
-    transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1), 
-                transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    transition: opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1), 
+                transform 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+                visibility 0.35s;
     margin-bottom: env(safe-area-inset-bottom, 10px);
 }
 
-/* Hidden state for auto-fade */
+/* Hidden state when clicking outside */
 .ui-faded {
     opacity: 0 !important;
     pointer-events: none !important;
-    transform: translateY(18px) scale(0.98) !important;
+    transform: translateY(22px) scale(0.97) !important;
+    visibility: hidden !important;
 }
 
 /* Main glass card */
 .controls-card {
     width: 100%;
-    background: rgba(26, 15, 25, 0.75);
+    background: rgba(26, 15, 25, 0.78);
     border: 1px solid var(--glass-border);
     border-radius: clamp(20px, 3.5vw, 32px);
     backdrop-filter: blur(24px);
@@ -294,88 +354,131 @@ html, body {
     box-shadow: 0 0 12px rgba(244, 114, 182, 0.3);
 }
 
-/* Inputs Row */
+/* ==========================================================================
+   TIME INPUTS ROW - PERFECTLY CENTERED & BALANCED
+   ========================================================================== */
 .time-inputs-row {
     display: flex;
-    align-items: center;
+    align-items: flex-end; /* Align inputs and colon on bottom baseline */
     justify-content: center;
-    gap: clamp(8px, 2vw, 16px);
+    gap: clamp(6px, 1.8vw, 14px);
+    width: 100%;
 }
 
 .input-block {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 4px;
+    gap: 6px;
 }
 
 .input-label {
     font-size: 0.72rem;
     font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.12em;
+    letter-spacing: 0.14em;
     color: var(--text-muted);
+    text-align: center;
 }
 
 .input-stepper {
     display: flex;
     align-items: center;
-    gap: 4px;
+    justify-content: center;
+    gap: 6px;
 }
 
 .step-btn {
-    width: 32px;
-    height: 32px;
+    width: 36px;
+    height: 36px;
     display: flex;
     align-items: center;
     justify-content: center;
     background: rgba(255, 255, 255, 0.08);
     border: 1px solid rgba(255, 255, 255, 0.12);
-    border-radius: 10px;
+    border-radius: 12px;
     color: var(--text-primary);
     cursor: pointer;
-    font-weight: bold;
-    font-size: 1.1rem;
+    font-weight: 700;
+    font-size: 1.25rem;
+    line-height: 1;
     transition: all 0.15s ease;
+    user-select: none;
+    -webkit-user-select: none;
 }
 
 .step-btn:hover {
     background: rgba(244, 114, 182, 0.25);
     border-color: var(--accent-pink);
+    transform: scale(1.05);
 }
 
 .step-btn:active {
     transform: scale(0.92);
 }
 
+/* Number display inside rounded box - Mathematically 100% Centered */
 .time-number-input {
-    width: clamp(64px, 16vw, 84px);
-    background: rgba(0, 0, 0, 0.3);
+    width: 76px;
+    height: 52px;
+    background: rgba(0, 0, 0, 0.4);
     color: #ffffff;
-    border-radius: 14px;
-    padding: 8px 4px;
-    text-align: center;
-    font-size: clamp(1.8rem, 4.5vw, 2.3rem);
+    border-radius: 16px;
+    padding: 0 !important;
+    margin: 0 !important;
+    text-align: center !important;
+    font-size: 2.2rem;
     font-weight: 700;
     font-family: 'Oswald', sans-serif;
-    border: 1.5px solid transparent;
+    font-variant-numeric: tabular-nums;
+    line-height: 52px;
+    letter-spacing: 0.01em;
+    border: 2px solid transparent;
     outline: none;
-    box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.4);
+    box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.45);
     transition: all 0.2s ease;
+    -webkit-appearance: none !important;
+    -moz-appearance: textfield !important;
+    appearance: none !important;
+    box-sizing: border-box;
+    display: block;
+}
+
+.time-number-input::-webkit-inner-spin-button,
+.time-number-input::-webkit-outer-spin-button {
+    -webkit-appearance: none !important;
+    margin: 0 !important;
+    display: none !important;
 }
 
 .time-number-input:focus {
     border-color: var(--accent-pink);
-    background: rgba(0, 0, 0, 0.45);
-    box-shadow: 0 0 15px rgba(244, 114, 182, 0.25), inset 0 2px 6px rgba(0, 0, 0, 0.5);
+    background: rgba(0, 0, 0, 0.55);
+    box-shadow: 0 0 16px rgba(244, 114, 182, 0.3), inset 0 2px 6px rgba(0, 0, 0, 0.5);
+}
+
+/* Center Colon Box - Exactly Centered with Input Numbers */
+.colon-box {
+    height: 52px; /* Matches input height */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 4px;
 }
 
 .input-separator {
     font-size: 2.2rem;
     font-weight: 700;
-    color: rgba(251, 207, 232, 0.4);
-    margin-top: 18px;
+    font-family: 'Oswald', sans-serif;
+    color: rgba(251, 207, 232, 0.45);
+    line-height: 1;
+    margin: 0;
+    padding: 0;
     user-select: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transform: translateY(-2px); /* Optical alignment of dots */
 }
 
 /* Actions Row */
@@ -464,15 +567,15 @@ html, body {
     transform: scale(0.96);
 }
 
-/* Footer options (Sound toggle, Wake Lock, Shortcuts) */
+/* Footer options (Sound toggle) */
 .options-bar {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: center;
     width: 100%;
     padding-top: 8px;
     border-top: 1px solid rgba(255, 255, 255, 0.07);
-    font-size: 0.82rem;
+    font-size: 0.85rem;
     color: var(--text-muted);
 }
 
@@ -531,42 +634,6 @@ input:checked + .slider {
 
 input:checked + .slider:before {
     transform: translateX(16px);
-}
-
-/* Floating touch restore button (visible only when UI is hidden) */
-.restore-ui-btn {
-    position: fixed;
-    bottom: clamp(16px, 3vh, 28px);
-    right: clamp(16px, 3vw, 28px);
-    width: 44px;
-    height: 44px;
-    border-radius: 50%;
-    background: rgba(30, 16, 28, 0.85);
-    border: 1px solid rgba(244, 114, 182, 0.3);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    color: var(--accent-soft);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    z-index: 40;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
-    opacity: 0;
-    pointer-events: none;
-    transform: scale(0.8);
-    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.restore-ui-btn.visible {
-    opacity: 1;
-    pointer-events: auto;
-    transform: scale(1);
-}
-
-.restore-ui-btn:hover {
-    background: rgba(244, 114, 182, 0.25);
-    transform: scale(1.08);
 }
 
 /* Countdown Overlay */
@@ -630,82 +697,6 @@ input:checked + .slider:before {
     display: none !important;
 }
 
-/* Modal for Help / Shortcuts */
-.modal-backdrop {
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.65);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 200;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.25s ease;
-    padding: 16px;
-}
-
-.modal-backdrop.open {
-    opacity: 1;
-    pointer-events: auto;
-}
-
-.modal-content {
-    background: #1e131d;
-    border: 1px solid var(--glass-border);
-    border-radius: 24px;
-    padding: 24px;
-    max-width: 420px;
-    width: 100%;
-    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6);
-    transform: translateY(20px);
-    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.modal-backdrop.open .modal-content {
-    transform: translateY(0);
-}
-
-.modal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 16px;
-}
-
-.modal-header h3 {
-    font-size: 1.15rem;
-    color: var(--accent-soft);
-}
-
-.modal-list {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    font-size: 0.9rem;
-    color: var(--text-muted);
-}
-
-.modal-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 6px 0;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-}
-
-.key-tag {
-    background: rgba(255, 255, 255, 0.12);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 6px;
-    padding: 2px 8px;
-    font-family: monospace;
-    font-size: 0.85rem;
-    color: #ffffff;
-}
-
 /* Screen Orientation and Media Queries */
 @media (max-width: 600px) {
     .controls-card {
@@ -713,31 +704,44 @@ input:checked + .slider:before {
         gap: 12px;
     }
     .options-bar {
-        font-size: 0.78rem;
+        font-size: 0.8rem;
     }
     .step-btn {
-        width: 28px;
-        height: 28px;
+        width: 32px;
+        height: 32px;
+        font-size: 1.1rem;
+    }
+    .time-number-input {
+        width: 68px;
+        height: 48px;
+        line-height: 48px;
+        font-size: 1.9rem;
+    }
+    .colon-box {
+        height: 48px;
+    }
+    .input-separator {
+        font-size: 1.9rem;
     }
 }
 
 /* Landscape orientation on mobile phones */
 @media (max-height: 540px) {
     .app-container {
-        padding: 8px 16px;
+        padding: 6px 14px;
     }
     .top-bar {
-        margin-bottom: 4px;
+        margin-bottom: 2px;
     }
     .controls-wrapper {
-        margin-bottom: 4px;
+        margin-bottom: 2px;
     }
     .controls-card {
-        padding: 10px 16px;
-        gap: 8px;
+        padding: 8px 14px;
+        gap: 6px;
     }
     .presets-row {
-        display: none; /* Hide presets in tight mobile landscape to avoid overlap */
+        display: none;
     }
     .options-bar {
         display: none;
@@ -746,6 +750,6 @@ input:checked + .slider:before {
         display: none;
     }
     .progress-container {
-        margin-top: 8px;
+        margin-top: 6px;
     }
 }

@@ -6,9 +6,7 @@
     <meta name="theme-color" content="#120a14">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="description" content="Aesthetic Flip Clock Focus Timer con suoni rilassanti, visuale Pomodoro e design ultra reattivo per mobile e desktop.">
-
-    <title>Aesthetic Flip Clock Timer</title>
+    <title>Timer</title>
 
     <!-- Component & Master Stylesheets -->
     <link rel="stylesheet" href="css/flip-clock.css">
@@ -20,7 +18,7 @@
     <div class="ambient-glow-1"></div>
     <div class="ambient-glow-2"></div>
 
-    <main class="app-container">
+    <main class="app-container" id="app-container">
         
         <!-- Top App Bar -->
         <header class="top-bar" id="top-bar">
@@ -30,16 +28,8 @@
             </div>
 
             <div class="top-actions">
-                <!-- Help / Shortcuts button -->
-                <button class="icon-btn" id="btn-help" title="Scorciatoie & Info (?)" aria-label="Informazioni e scorciatoie">
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <circle cx="12" cy="12" r="10" stroke-width="2"></circle>
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 16v-2m0-4.5a2 2 0 112 2c-.5.5-1 1-1 1.5"></path>
-                    </svg>
-                </button>
-
-                <!-- Fullscreen button -->
-                <button class="icon-btn" id="btn-fullscreen" title="Schermo Intero (F)" aria-label="Schermo intero">
+                <!-- Fullscreen button (hidden on mobile phones) -->
+                <button class="icon-btn" id="btn-fullscreen" title="Schermo Intero" aria-label="Schermo intero">
                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"></path>
                     </svg>
@@ -48,7 +38,7 @@
         </header>
 
         <!-- Center Flip Clock Stage -->
-        <section class="clock-stage">
+        <section class="clock-stage" id="clock-stage">
             <div class="clock-container" id="clock-container" role="timer" aria-live="polite">
                 <!-- Minutes Section -->
                 <div class="time-section" aria-label="Minuti">
@@ -74,7 +64,7 @@
 
         <!-- Bottom Controls Glassmorphism Wrapper -->
         <div class="controls-wrapper" id="controls-wrapper">
-            <div class="controls-card">
+            <div class="controls-card" id="controls-card">
                 
                 <!-- Quick Duration Presets -->
                 <div class="presets-row">
@@ -85,26 +75,29 @@
                     <button class="preset-chip" data-seconds="3000">50 min</button>
                 </div>
 
-                <!-- Time Inputs Row with Steppers -->
+                <!-- Time Inputs Row with Centered Steppers -->
                 <div class="time-inputs-row">
                     <!-- Minutes input block -->
                     <div class="input-block">
                         <label for="in-m" class="input-label">Minuti</label>
                         <div class="input-stepper">
                             <button type="button" class="step-btn" data-target="in-m" data-step="-1" aria-label="Diminuisci minuti">-</button>
-                            <input type="number" id="in-m" min="0" max="99" value="20" inputmode="numeric" class="time-number-input" aria-label="Imposta minuti">
+                            <input type="text" id="in-m" value="20" inputmode="numeric" maxlength="2" pattern="[0-9]*" class="time-number-input" aria-label="Imposta minuti">
                             <button type="button" class="step-btn" data-target="in-m" data-step="1" aria-label="Aumenta minuti">+</button>
                         </div>
                     </div>
 
-                    <span class="input-separator" aria-hidden="true">:</span>
+                    <!-- Center Colon Separator Box -->
+                    <div class="colon-box" aria-hidden="true">
+                        <span class="input-separator">:</span>
+                    </div>
 
                     <!-- Seconds input block -->
                     <div class="input-block">
                         <label for="in-s" class="input-label">Secondi</label>
                         <div class="input-stepper">
                             <button type="button" class="step-btn" data-target="in-s" data-step="-5" aria-label="Diminuisci secondi">-</button>
-                            <input type="number" id="in-s" min="0" max="59" value="00" inputmode="numeric" class="time-number-input" aria-label="Imposta secondi">
+                            <input type="text" id="in-s" value="00" inputmode="numeric" maxlength="2" pattern="[0-9]*" class="time-number-input" aria-label="Imposta secondi">
                             <button type="button" class="step-btn" data-target="in-s" data-step="5" aria-label="Aumenta secondi">+</button>
                         </div>
                     </div>
@@ -138,10 +131,6 @@
                         </div>
                         <span>Suono Flip / Ticking</span>
                     </label>
-
-                    <span class="desktop-hint" style="opacity: 0.65; font-size: 0.76rem;">
-                        Spazio = Avvia/Pausa
-                    </span>
                 </div>
 
             </div>
@@ -149,52 +138,10 @@
 
     </main>
 
-    <!-- Floating Button to Restore Controls on Touch / Mobile -->
-    <button id="btn-restore-ui" class="restore-ui-btn" title="Mostra controlli" aria-label="Mostra controlli">
-        <svg width="22" height="22" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path>
-        </svg>
-    </button>
-
     <!-- 3-Second Countdown Overlay -->
     <div id="countdown-overlay" class="countdown-overlay" aria-hidden="true">
         <div id="countdown-number" class="countdown-number">3</div>
         <div class="countdown-subtext">Focus in arrivo...</div>
-    </div>
-
-    <!-- Shortcuts & Info Modal -->
-    <div id="help-modal" class="modal-backdrop" aria-hidden="true">
-        <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="modal-title">
-            <div class="modal-header">
-                <h3 id="modal-title">🌸 Controlli & Scorciatoie</h3>
-                <button id="btn-close-modal" class="icon-btn" style="width: 32px; height: 32px;" aria-label="Chiudi finestra">✕</button>
-            </div>
-            <div class="modal-list">
-                <div class="modal-item">
-                    <span>Avvia / Pausa / Riprendi</span>
-                    <span class="key-tag">Spazio</span>
-                </div>
-                <div class="modal-item">
-                    <span>Azzera timer</span>
-                    <span class="key-tag">R</span>
-                </div>
-                <div class="modal-item">
-                    <span>Schermo intero</span>
-                    <span class="key-tag">F</span>
-                </div>
-                <div class="modal-item">
-                    <span>Attiva/Disattiva Suono</span>
-                    <span class="key-tag">M</span>
-                </div>
-                <div class="modal-item">
-                    <span>Mostra/Nascondi UI</span>
-                    <span class="key-tag">Tocco / Click sullo sfondo</span>
-                </div>
-                <div class="modal-item" style="border: none; margin-top: 6px;">
-                    <span style="font-size: 0.8rem; opacity: 0.75;">📱 Su mobile lo schermo rimane attivo durante il timer (Screen Wake Lock).</span>
-                </div>
-            </div>
-        </div>
     </div>
 
     <!-- Core Modular Scripts -->

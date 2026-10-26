@@ -1,6 +1,6 @@
 /**
  * Main Application Controller
- * Handles UI interactions, inputs, keyboard shortcuts, mobile gestures, and state binding.
+ * Handles UI interactions, inputs, click-outside toggling, and timer binding.
  */
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -13,18 +13,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnReset = document.getElementById('btn-reset');
     const soundToggle = document.getElementById('sound-tick');
     const btnFullscreen = document.getElementById('btn-fullscreen');
-    const btnHelp = document.getElementById('btn-help');
-    const helpModal = document.getElementById('help-modal');
-    const btnCloseModal = document.getElementById('btn-close-modal');
-    const btnRestoreUi = document.getElementById('btn-restore-ui');
 
     const topBar = document.getElementById('top-bar');
     const controlsWrapper = document.getElementById('controls-wrapper');
+    const controlsCard = document.getElementById('controls-card');
+    const clockStage = document.getElementById('clock-stage');
     const statusDot = document.getElementById('status-dot');
     const statusText = document.getElementById('status-text');
     const presetChips = document.querySelectorAll('.preset-chip');
 
-    let mouseInactivityTimeout = null;
     let isUiHidden = false;
 
     // --- Audio Init ---
@@ -35,25 +32,29 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // --- Inputs Handling ---
-    function clampInputs() {
-        let m = parseInt(inM.value, 10);
-        let s = parseInt(inS.value, 10);
+    // --- Inputs Handling (Centered, text-based numeric inputs) ---
+    function sanitizeValue(input, max) {
+        let raw = input.value.replace(/\D/g, ''); // Digits only
+        let num = parseInt(raw, 10);
+        if (isNaN(num) || num < 0) num = 0;
+        if (num > max) num = max;
+        return num;
+    }
 
-        if (isNaN(m) || m < 0) m = 0;
-        if (m > 99) m = 99;
+    function clampInputs(formatDisplay = true) {
+        let m = sanitizeValue(inM, 99);
+        let s = sanitizeValue(inS, 59);
 
-        if (isNaN(s) || s < 0) s = 0;
-        if (s > 59) s = 59;
-
-        inM.value = String(m).padStart(2, '0');
-        inS.value = String(s).padStart(2, '0');
+        if (formatDisplay) {
+            inM.value = String(m).padStart(2, '0');
+            inS.value = String(s).padStart(2, '0');
+        }
 
         return { minutes: m, seconds: s, total: (m * 60) + s };
     }
 
-    function syncTimerFromInputs() {
-        const { total } = clampInputs();
+    function syncTimerFromInputs(formatDisplay = false) {
+        const { total } = clampInputs(formatDisplay);
         window.focusTimer.setDuration(total);
         highlightMatchingPreset(total);
     }
@@ -61,21 +62,32 @@ document.addEventListener('DOMContentLoaded', () => {
     [inM, inS].forEach(input => {
         if (!input) return;
 
-        // Prevent typing non-numeric characters ('e', '+', '-', '.')
+        // Filter keys
         input.addEventListener('keydown', (e) => {
             if (['e', 'E', '+', '-', '.'].includes(e.key)) {
                 e.preventDefault();
             }
+            if (e.key === 'Enter') {
+                input.blur();
+            }
         });
 
         input.addEventListener('input', () => {
+            // Remove any non-digits immediately
+            input.value = input.value.replace(/\D/g, '').slice(0, 2);
             if (window.focusTimer.state === 'IDLE' || window.focusTimer.state === 'FINISHED') {
-                syncTimerFromInputs();
+                syncTimerFromInputs(false);
             }
         });
 
         input.addEventListener('blur', () => {
-            clampInputs();
+            clampInputs(true);
+            syncTimerFromInputs(true);
+        });
+
+        // Select all on focus for quick edit
+        input.addEventListener('focus', () => {
+            input.select();
         });
     });
 
@@ -94,7 +106,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 let max = targetInputId === 'in-m' ? 99 : 59;
                 let next = Math.max(0, Math.min(max, current + delta));
                 targetInput.value = String(next).padStart(2, '0');
-                syncTimerFromInputs();
+                syncTimerFromInputs(true);
             }
         });
     });
@@ -123,7 +135,7 @@ document.addEventListener('DOMContentLoaded', () => {
             inM.value = String(m).padStart(2, '0');
             inS.value = String(s).padStart(2, '0');
 
-            syncTimerFromInputs();
+            syncTimerFromInputs(true);
         });
     });
 
@@ -132,9 +144,9 @@ document.addEventListener('DOMContentLoaded', () => {
         btnStart.addEventListener('click', (e) => {
             e.stopPropagation();
             window.soundManager.initAudioContext();
-            const { total } = clampInputs();
+            const { total } = clampInputs(true);
             if (total <= 0) return;
-            window.focusTimer.start(true); // with 3-second countdown
+            window.focusTimer.start(true);
         });
     }
 
@@ -142,7 +154,7 @@ document.addEventListener('DOMContentLoaded', () => {
         btnResume.addEventListener('click', (e) => {
             e.stopPropagation();
             window.soundManager.initAudioContext();
-            window.focusTimer.start(false); // resume immediately without countdown
+            window.focusTimer.start(false);
         });
     }
 
@@ -162,12 +174,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Timer State Listener ---
     window.focusTimer.onStateChange = (state) => {
-        // Toggle input enabled/disabled
         const isInteractive = (state === 'IDLE' || state === 'FINISHED');
         inM.disabled = !isInteractive;
         inS.disabled = !isInteractive;
 
-        // Button visibility
         btnStart.classList.add('hidden');
         btnResume.classList.add('hidden');
         btnPause.classList.add('hidden');
@@ -186,7 +196,7 @@ document.addEventListener('DOMContentLoaded', () => {
             btnPause.classList.remove('hidden');
             statusDot.className = 'status-dot running';
             statusText.textContent = 'Focus in corso';
-            scheduleAutoHide();
+            hideUI();
         } else if (state === 'PAUSED') {
             btnResume.classList.remove('hidden');
             statusDot.className = 'status-dot paused';
@@ -201,71 +211,56 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // --- UI Auto-Hide / Show (Desktop & Mobile Touch Safe) ---
+    // --- UI Show / Hide (Click Outside to Hide / Click to Show with Clock Scaling) ---
     function showUI() {
         isUiHidden = false;
-        if (topBar) topBar.classList.remove('ui-faded');
         if (controlsWrapper) controlsWrapper.classList.remove('ui-faded');
-        if (btnRestoreUi) btnRestoreUi.classList.remove('visible');
-        clearTimeout(mouseInactivityTimeout);
+        if (topBar) topBar.classList.remove('ui-faded');
+        if (clockStage) clockStage.classList.remove('clock-expanded');
     }
 
     function hideUI() {
-        if (window.focusTimer.state !== 'RUNNING' && window.focusTimer.state !== 'COUNTDOWN') return;
         isUiHidden = true;
-        if (topBar) topBar.classList.add('ui-faded');
         if (controlsWrapper) controlsWrapper.classList.add('ui-faded');
-        if (btnRestoreUi) btnRestoreUi.classList.add('visible');
+        if (topBar) topBar.classList.add('ui-faded');
+        if (clockStage) clockStage.classList.add('clock-expanded');
     }
 
-    function scheduleAutoHide() {
-        clearTimeout(mouseInactivityTimeout);
-        if (window.focusTimer.state === 'RUNNING') {
-            mouseInactivityTimeout = setTimeout(() => {
-                hideUI();
-            }, 3500);
-        }
-    }
-
-    // Interaction handler for both mouse and touch
-    function handleUserActivity(e) {
-        // Unlock audio context on first user interaction
+    // Click anywhere outside the controls card to toggle hide/show
+    document.addEventListener('pointerdown', (e) => {
         window.soundManager.initAudioContext();
 
-        // If clicking on an interactive control inside controlsWrapper, don't auto hide immediately
-        showUI();
-        scheduleAutoHide();
-    }
-
-    // Tap/Click anywhere on background to toggle UI visibility
-    document.addEventListener('pointerdown', (e) => {
-        // If clicking interactive elements, let them handle it
-        if (e.target.closest('button, input, label, a, .modal-content, .preset-chip')) {
+        // If clicking inside controls-card or directly on fullscreen button, let it work normally
+        if (e.target.closest('#controls-card, #btn-fullscreen')) {
             return;
         }
 
-        if (window.focusTimer.state === 'RUNNING') {
-            if (isUiHidden) {
-                showUI();
-                scheduleAutoHide();
-            } else {
-                hideUI();
-            }
+        // Clicked outside / on screen: toggle hide or show
+        if (!isUiHidden) {
+            hideUI();
+        } else {
+            showUI();
         }
     });
 
-    document.addEventListener('mousemove', handleUserActivity);
-    document.addEventListener('keydown', handleUserActivity);
+    // --- Fullscreen Manager (Desktop only, hidden on mobile) ---
+    const isFullscreenSupported = () => {
+        return !!(document.fullscreenEnabled || document.webkitFullscreenEnabled);
+    };
 
-    if (btnRestoreUi) {
-        btnRestoreUi.addEventListener('click', (e) => {
-            e.stopPropagation();
-            showUI();
-            scheduleAutoHide();
-        });
+    const isMobileDevice = window.matchMedia('(max-width: 768px)').matches || ('ontouchstart' in window && !document.fullscreenEnabled);
+
+    if (btnFullscreen) {
+        if (!isFullscreenSupported() || isMobileDevice) {
+            btnFullscreen.style.display = 'none';
+        } else {
+            btnFullscreen.addEventListener('click', (e) => {
+                e.stopPropagation();
+                toggleFullscreen();
+            });
+        }
     }
 
-    // --- Fullscreen Manager (with iOS and Cross-Browser Graceful Handling) ---
     function isFullscreenActive() {
         return !!(document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement);
     }
@@ -291,103 +286,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    if (btnFullscreen) {
-        btnFullscreen.addEventListener('click', (e) => {
-            e.stopPropagation();
-            toggleFullscreen();
-        });
-    }
-
-    // Update fullscreen icon on change
-    function updateFullscreenIcon() {
-        const active = isFullscreenActive();
-        if (btnFullscreen) {
-            btnFullscreen.setAttribute('title', active ? 'Esci da Schermo Intero (F)' : 'Schermo Intero (F)');
-        }
-    }
-
-    document.addEventListener('fullscreenchange', updateFullscreenIcon);
-    document.addEventListener('webkitfullscreenchange', updateFullscreenIcon);
-
-    // --- Shortcuts Help Modal ---
-    function openHelp() {
-        if (helpModal) helpModal.classList.add('open');
-    }
-
-    function closeHelp() {
-        if (helpModal) helpModal.classList.remove('open');
-    }
-
-    if (btnHelp) {
-        btnHelp.addEventListener('click', (e) => {
-            e.stopPropagation();
-            openHelp();
-        });
-    }
-
-    if (btnCloseModal) {
-        btnCloseModal.addEventListener('click', (e) => {
-            e.stopPropagation();
-            closeHelp();
-        });
-    }
-
-    if (helpModal) {
-        helpModal.addEventListener('click', (e) => {
-            if (e.target === helpModal) {
-                closeHelp();
-            }
-        });
-    }
-
-    // --- Global Keyboard Shortcuts ---
-    document.addEventListener('keydown', (e) => {
-        // If focusing inside an input field, only respond to Escape or Enter
-        if (document.activeElement && (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA')) {
-            if (e.key === 'Escape' || e.key === 'Enter') {
-                document.activeElement.blur();
-            }
-            return;
-        }
-
-        switch (e.code) {
-            case 'Space':
-                e.preventDefault();
-                if (window.focusTimer.state === 'RUNNING') {
-                    window.focusTimer.pause();
-                } else if (window.focusTimer.state === 'PAUSED') {
-                    window.focusTimer.start(false);
-                } else {
-                    window.focusTimer.start(true);
-                }
-                break;
-            case 'KeyR':
-                e.preventDefault();
-                window.focusTimer.reset();
-                break;
-            case 'KeyF':
-                e.preventDefault();
-                toggleFullscreen();
-                break;
-            case 'KeyM':
-                e.preventDefault();
-                if (soundToggle) {
-                    soundToggle.checked = !soundToggle.checked;
-                    window.soundManager.setEnabled(soundToggle.checked);
-                }
-                break;
-            case 'Escape':
-                closeHelp();
-                break;
-            case 'Slash':
-                if (e.shiftKey) { // '?' key
-                    e.preventDefault();
-                    openHelp();
-                }
-                break;
-        }
-    });
-
     // --- Initial Setup ---
-    syncTimerFromInputs();
+    syncTimerFromInputs(true);
 });

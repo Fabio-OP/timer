@@ -30,7 +30,7 @@ Un timer Pomodoro e flip clock minimalista, elegante ed altamente reattivo, real
   - Preset veloci: **5 min**, **15 min**, **20 min**, **25 min (Pomodoro)**, **50 min**.
   - Barra di avanzamento fluida in tempo reale.
   - Titolo della scheda dinamico con tempo residuo e indicatore di stato.
-  - Scorciatoie da tastiera e supporto Schermo Intero (fullscreen cross-browser).
+  - Nascondi/Mostra controlli con un semplice clic sullo sfondo.
 
 ---
 
@@ -46,24 +46,11 @@ timer/
 │   ├── audio.js            # Manager audio (HTML5 Audio + Web Audio API synthesizer)
 │   ├── clock-flip.js       # Componente di rendering delle cifre split-flap
 │   ├── timer.js            # Motore del timer, precisione timestamp, Wake Lock
-│   └── app.js              # Controller UI, eventi touch/mouse, preset e scorciatoie
+│   └── app.js              # Controller UI, eventi touch/mouse e preset
 ├── assets/
 │   └── flip.mp3            # Effetto sonoro meccanico
 └── README.md               # Documentazione del progetto
 ```
-
----
-
-## ⌨️ Scorciatoie da Tastiera
-
-| Tasto | Azione |
-| :--- | :--- |
-| **Spazio** | Avvia / Metti in Pausa / Riprendi |
-| **R** | Azzera il timer |
-| **F** | Attiva / Disattiva Schermo Intero |
-| **M** | Attiva / Disattiva Suoni |
-| **?** | Apri la finestra di aiuto e scorciatoie |
-| **Esc** | Chiudi finestre modali o deseleziona |
 
 ---
 
