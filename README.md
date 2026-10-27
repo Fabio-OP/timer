@@ -48,7 +48,10 @@ timer/
 │   ├── timer.js            # Motore del timer, precisione timestamp, Wake Lock
 │   └── app.js              # Controller UI, eventi touch/mouse e preset
 ├── assets/
-│   └── flip.mp3            # Effetto sonoro meccanico
+│   ├── icon.jpeg            # Favicon del sito
+│   ├── icon.jpg             # Icona per il salvataggio su iOS e Android
+│   └── flip.mp3             # Effetto sonoro meccanico
+├── manifest.webmanifest     # Configurazione installazione come app
 └── README.md               # Documentazione del progetto
 ```
 
